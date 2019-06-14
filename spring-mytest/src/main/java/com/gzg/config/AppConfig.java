@@ -1,7 +1,7 @@
 package com.gzg.config;
 
+import com.gzg.annotation.CustomizeMapperScan;
 import org.mybatis.spring.SqlSessionFactoryBean;
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -16,7 +16,10 @@ import javax.sql.DataSource;
  */
 @Configuration
 @ComponentScan("com.gzg")
-@MapperScan("com.gzg.dao")
+//@ImportResource("classpath:spring.xml")
+//@MapperScan("com.gzg.dao")
+//@Import(SpringImportBeanDefinitionRegistrar.class)
+@CustomizeMapperScan
 public class AppConfig {
 	@Bean
 	public DataSource dataSource() {
