@@ -60,6 +60,7 @@ public class BeanDefinitionReaderUtils {
 		GenericBeanDefinition bd = new GenericBeanDefinition();
 		bd.setParentName(parentName);
 		if (className != null) {
+			//如果classLoader不为空，则使用classLoader同一虚拟机加载类对象，否则只是记录className
 			if (classLoader != null) {
 				bd.setBeanClass(ClassUtils.forName(className, classLoader));
 			}
@@ -147,9 +148,11 @@ public class BeanDefinitionReaderUtils {
 
 		// Register bean definition under primary name.
 		String beanName = definitionHolder.getBeanName();
+		//使用beanName做唯一标识进行注册
 		registry.registerBeanDefinition(beanName, definitionHolder.getBeanDefinition());
 
 		// Register aliases for bean name, if any.
+		//注册所有的别名
 		String[] aliases = definitionHolder.getAliases();
 		if (aliases != null) {
 			for (String alias : aliases) {

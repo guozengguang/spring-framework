@@ -4,11 +4,10 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd"
 >
-
-	<!--<bean id="xxx" class="com.gzg.service.MybatisMapperFactoryBean">-->
-		<!--<property name="mapperInterface" value="com.gzg.dao.CategoryDao"/>-->
-	<!--</bean>-->
-	<bean id="myTestBean" class="com.gzg.bean.MyTestBean">
-		<meta key="testStr" value="aaaaaa"/>
+	<bean id="beanTest" class="com.gzg.test.BeanTest">
+		<!--<lookup-method name="getBean" bean="teacher"/>-->
+		<lookup-method name="getBean" bean="student"/>
 	</bean>
+	<bean id="teacher" class='com.gzg.bean.lookup.Teacher'/>
+	<bean id="student" class='com.gzg.bean.lookup.Student'/>
 </beans>

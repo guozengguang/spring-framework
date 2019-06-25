@@ -16,6 +16,7 @@ public class SpringImportBeanDefinitionRegistrar implements ImportBeanDefinition
 	public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 		BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(MybatisMapperFactoryBean.class);
 		AbstractBeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
+		System.out.println(beanDefinition.getAutowireMode());
 		beanDefinition.getConstructorArgumentValues().addGenericArgumentValue("com.gzg.dao.CategoryDao");
 		registry.registerBeanDefinition("categoryDao", beanDefinition);
 	}

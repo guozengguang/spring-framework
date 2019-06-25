@@ -14,9 +14,9 @@ public class Test {
 //		categoryService.query();
 //		C2 c2 = annotationConfigApplicationContext.getBean(C2.class);
 //		System.out.println(c2);
-		System.out.println("C1:" + annotationConfigApplicationContext.getBean("myFactoryBean"));
+//		System.out.println("C1:" + annotationConfigApplicationContext.getBean("myFactoryBean"));
 		System.out.println("myFactoryBean:" + annotationConfigApplicationContext.getBean("&myFactoryBean"));
-		System.out.println("categoryDao:" + annotationConfigApplicationContext.getBean("myFactoryBean"));
+//		System.out.println("categoryDao:" + annotationConfigApplicationContext.getBean("myFactoryBean"));
 
 
 //		Class[] interfaces = new Class[]{CategoryDao.class};

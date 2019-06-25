@@ -16,56 +16,23 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanMetadataAttribute;
+import org.springframework.beans.BeanMetadataAttributeAccessor;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.config.*;
+import org.springframework.beans.factory.parsing.*;
+import org.springframework.beans.factory.support.*;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import org.springframework.beans.BeanMetadataAttribute;
-import org.springframework.beans.BeanMetadataAttributeAccessor;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionHolder;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.RuntimeBeanNameReference;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
-import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.beans.factory.parsing.BeanEntry;
-import org.springframework.beans.factory.parsing.ConstructorArgumentEntry;
-import org.springframework.beans.factory.parsing.ParseState;
-import org.springframework.beans.factory.parsing.PropertyEntry;
-import org.springframework.beans.factory.parsing.QualifierEntry;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.AutowireCandidateQualifier;
-import org.springframework.beans.factory.support.BeanDefinitionDefaults;
-import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
-import org.springframework.beans.factory.support.LookupOverride;
-import org.springframework.beans.factory.support.ManagedArray;
-import org.springframework.beans.factory.support.ManagedList;
-import org.springframework.beans.factory.support.ManagedMap;
-import org.springframework.beans.factory.support.ManagedProperties;
-import org.springframework.beans.factory.support.ManagedSet;
-import org.springframework.beans.factory.support.MethodOverrides;
-import org.springframework.beans.factory.support.ReplaceOverride;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PatternMatchUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.util.xml.DomUtils;
+import java.util.*;
 
 /**
  * Stateful delegate class used to parse XML bean definitions.
@@ -412,9 +379,12 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+		//解析id属性
 		String id = ele.getAttribute(ID_ATTRIBUTE);
+		//解析name属性
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
+		//分隔name属性
 		List<String> aliases = new ArrayList<>();
 		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
@@ -438,6 +408,7 @@ public class BeanDefinitionParserDelegate {
 		if (beanDefinition != null) {
 			if (!StringUtils.hasText(beanName)) {
 				try {
+					//如果不存在beanName 那么根据spring提供的命名规则为当前bean生成对应的beanName
 					if (containingBean != null) {
 						beanName = BeanDefinitionReaderUtils.generateBeanName(
 								beanDefinition, this.readerContext.getRegistry(), true);
@@ -503,26 +474,37 @@ public class BeanDefinitionParserDelegate {
 		this.parseState.push(new BeanEntry(beanName));
 
 		String className = null;
+		//解析class属性
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
 		String parent = null;
+		//解析parent属性
 		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 			parent = ele.getAttribute(PARENT_ATTRIBUTE);
 		}
 
 		try {
+			//创建用于承载属性的AbstractBeanDefinition类型的GenericBeanDefinition
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
 
+			//硬编码解析bean的各种属性
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
+			//提取description
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
 
+			//提取元数据
 			parseMetaElements(ele, bd);
+			//解析lookup-method属性
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			//解析replace-method属性
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
 
+			//解析构造函数参数
 			parseConstructorArgElements(ele, bd);
+			//解析property子元素
 			parsePropertyElements(ele, bd);
+			//解析qualifier
 			parseQualifierElements(ele, bd);
 
 			bd.setResource(this.readerContext.getResource());
@@ -559,18 +541,22 @@ public class BeanDefinitionParserDelegate {
 		if (ele.hasAttribute(SINGLETON_ATTRIBUTE)) {
 			error("Old 1.x 'singleton' attribute in use - upgrade to 'scope' declaration", ele);
 		}
+		//解析scope属性
 		else if (ele.hasAttribute(SCOPE_ATTRIBUTE)) {
 			bd.setScope(ele.getAttribute(SCOPE_ATTRIBUTE));
 		}
 		else if (containingBean != null) {
 			// Take default from containing bean in case of an inner bean definition.
+			//在嵌入beanDFeinition的情况下且没有单独指定scope属性则使用父类默认的属性
 			bd.setScope(containingBean.getScope());
 		}
 
+		//解析abstract属性
 		if (ele.hasAttribute(ABSTRACT_ATTRIBUTE)) {
 			bd.setAbstract(TRUE_VALUE.equals(ele.getAttribute(ABSTRACT_ATTRIBUTE)));
 		}
 
+		//解析lazy-init属性
 		String lazyInit = ele.getAttribute(LAZY_INIT_ATTRIBUTE);
 		if (isDefaultValue(lazyInit)) {
 			lazyInit = this.defaults.getLazyInit();
@@ -1352,17 +1338,26 @@ public class BeanDefinitionParserDelegate {
 		return parseCustomElement(ele, null);
 	}
 
+	/**
+	 * containingBd为父类bean，对顶层元素的解析设置为null
+	 * @param ele
+	 * @param containingBd
+	 * @return
+	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		//获取对应的命名空间
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		//根据命名空间找到对应的NamespaceHandler
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		//调用自定义的NamespaceHandler进行解析
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 
