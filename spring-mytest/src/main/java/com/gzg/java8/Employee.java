@@ -1,21 +1,41 @@
 package com.gzg.java8;
 
+import java.util.Objects;
+
 /**
  * @author guozengguang
  * @date 2019-06-25 12:47
  */
 public class Employee {
+	private int id;
 	private String name;
-	private int age;
+	private Integer age;
 	private double salary;
 
 	public Employee() {
+	}
+
+	public Employee(int id) {
+		this.id = id;
+	}
+
+	public Employee(int id, Integer age) {
+		this.id = id;
+		this.age = age;
 	}
 
 	public Employee(String name, int age, double salary) {
 		this.name = name;
 		this.age = age;
 		this.salary = salary;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -26,11 +46,11 @@ public class Employee {
 		this.name = name;
 	}
 
-	public int getAge() {
+	public Integer getAge() {
 		return age;
 	}
 
-	public void setAge(int age) {
+	public void setAge(Integer age) {
 		this.age = age;
 	}
 
@@ -45,9 +65,30 @@ public class Employee {
 	@Override
 	public String toString() {
 		return "Employee{" +
-				"name='" + name + '\'' +
+				"id=" + id +
+				", name='" + name + '\'' +
 				", age=" + age +
 				", salary=" + salary +
 				'}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Employee employee = (Employee) o;
+		return id == employee.id &&
+				age == employee.age &&
+				Double.compare(employee.salary, salary) == 0 &&
+				name.equals(employee.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, name, age, salary);
 	}
 }
